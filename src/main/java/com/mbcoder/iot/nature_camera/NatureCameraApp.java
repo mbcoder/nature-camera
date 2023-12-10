@@ -1,5 +1,9 @@
 package com.mbcoder.iot.nature_camera;
 
+import com.pi4j.Pi4J;
+import com.pi4j.io.gpio.digital.DigitalInput;
+import com.pi4j.io.gpio.digital.DigitalInputProvider;
+import com.pi4j.io.gpio.digital.PullResistance;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -42,6 +46,28 @@ public class NatureCameraApp extends Application {
     StackPane stackPane = new StackPane();
     Scene scene = new Scene(stackPane);
     stage.setScene(scene);
+
+    var pi4j = Pi4J.newAutoContext();
+
+    var config = DigitalInput.newConfigBuilder(pi4j)
+        //.id("my-digital-input")
+        .address(17)
+        .pull(PullResistance.PULL_DOWN)
+        .build();
+
+    // get a Digital Input I/O provider from the Pi4J context
+    DigitalInputProvider digitalInputProvider = pi4j.provider("pigpio-digital-input");
+
+    var input = digitalInputProvider.create(config);
+
+    // setup a digital output listener to listen for any state changes on the digital input
+    input.addListener(event -> {
+      Integer count = (Integer) event.source().metadata().get("count").value();
+
+      System.out.println(event + " === " + count);
+    });
+
+
 
   }
 
