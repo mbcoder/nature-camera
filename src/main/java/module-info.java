@@ -24,5 +24,7 @@ module com.mbcoder.iot.nature_camera {
   requires com.pi4j;
   requires com.pi4j.plugin.pigpio;
 
+  opens com.mbcoder.iot.nature_camera to com.pi4j;
+
   exports com.mbcoder.iot.nature_camera;
 }

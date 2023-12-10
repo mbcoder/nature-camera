@@ -67,7 +67,7 @@ public class NatureCameraApp extends Application {
       System.out.println(event + " === " + count);
     });
 
-    System.out.println("THE STARTING DIGITAL INPUT STATE IS [");
+    System.out.print("THE STARTING DIGITAL INPUT STATE IS [");
     System.out.println(input.state() + "]");
 
 
