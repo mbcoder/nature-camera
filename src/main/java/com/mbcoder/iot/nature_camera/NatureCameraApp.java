@@ -66,9 +66,9 @@ public class NatureCameraApp extends Application {
 
     // setup a digital output listener to listen for any state changes on the digital input
     input.addListener(event -> {
-      Integer count = (Integer) event.source().metadata().get("count").value();
-
-      System.out.println(event + " === " + count);
+      //Integer count = (Integer) event.source().metadata().get("count").value();
+      System.out.println(" --- button state = " + input.state());
+      //System.out.println(event + " === " + count);
     });
 
     Button btnState = new Button("state update");
