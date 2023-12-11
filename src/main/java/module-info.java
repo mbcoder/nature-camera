@@ -23,6 +23,7 @@ module com.mbcoder.iot.nature_camera {
   // Pi4J MODULES
   requires com.pi4j;
   requires com.pi4j.plugin.pigpio;
+  requires javafx.controls;
 
   opens com.mbcoder.iot.nature_camera to com.pi4j;
 

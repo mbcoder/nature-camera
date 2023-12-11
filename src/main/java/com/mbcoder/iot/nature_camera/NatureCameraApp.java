@@ -8,6 +8,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.scene.control.Button;
 
 /**
  * Copyright 2019 Esri
@@ -50,7 +51,7 @@ public class NatureCameraApp extends Application {
     var pi4j = Pi4J.newAutoContext();
 
     var config = DigitalInput.newConfigBuilder(pi4j)
-        //.id("my-digital-input")
+        .id("pir-sensor")
         .address(17)
         .pull(PullResistance.PULL_DOWN)
         .build();
@@ -60,11 +61,19 @@ public class NatureCameraApp extends Application {
 
     var input = digitalInputProvider.create(config);
 
+    var state = input.state();
+
+
     // setup a digital output listener to listen for any state changes on the digital input
     input.addListener(event -> {
       Integer count = (Integer) event.source().metadata().get("count").value();
 
       System.out.println(event + " === " + count);
+    });
+
+    Button btnState = new Button("state update");
+    btnState.setOnAction(event -> {
+      System.out.println("button state = " + input.state());
     });
 
     System.out.print("THE STARTING DIGITAL INPUT STATE IS [");
