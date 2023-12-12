@@ -3,6 +3,7 @@ package com.mbcoder.iot.nature_camera;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -26,6 +27,7 @@ import javafx.stage.Stage;
  */
 
 public class NatureCameraApp extends Application {
+  private OutputStream out;
 
 
   public static void main(String[] args) {
@@ -46,14 +48,14 @@ public class NatureCameraApp extends Application {
     Runnable pythonRunnable = new Runnable() {
       @Override
       public void run() {
-        Process p;
+        Process pythonProcess;
         try {
-          p = Runtime.getRuntime().exec(new String[]{"python3","pircamera.py"});
+          pythonProcess = Runtime.getRuntime().exec(new String[]{"python3","pircamera.py"});
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        BufferedReader br = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()));
         String line;
         while (true) {
           try {
@@ -63,6 +65,10 @@ public class NatureCameraApp extends Application {
           }
           System.out.println(line);
         }
+
+        out = pythonProcess.getOutputStream();
+
+
       }
     };
 
@@ -78,9 +84,11 @@ public class NatureCameraApp extends Application {
 
     Button btnStop = new Button("stop");
     btnStop.setOnAction(event -> {
-
-      //pythonThread.interrupt();
-      pythonThread.stop();
+      try {
+        out.close();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     });
     stackPane.getChildren().add(btnStop);
 
