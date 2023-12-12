@@ -55,6 +55,9 @@ public class NatureCameraApp extends Application {
           throw new RuntimeException(e);
         }
 
+        out = pythonProcess.getOutputStream();
+        System.out.println("out " + out.toString());
+
         BufferedReader br = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()));
         String line;
         while (true) {
@@ -66,8 +69,7 @@ public class NatureCameraApp extends Application {
           System.out.println(line);
         }
 
-        out = pythonProcess.getOutputStream();
-        System.out.println("out " + out.toString());
+
 
 
       }
