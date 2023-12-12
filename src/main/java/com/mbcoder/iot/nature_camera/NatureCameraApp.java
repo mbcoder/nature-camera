@@ -67,6 +67,7 @@ public class NatureCameraApp extends Application {
         }
 
         out = pythonProcess.getOutputStream();
+        System.out.println("out " + out.toString());
 
 
       }
