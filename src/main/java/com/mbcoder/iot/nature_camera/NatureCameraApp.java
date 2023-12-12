@@ -55,8 +55,7 @@ public class NatureCameraApp extends Application {
           throw new RuntimeException(e);
         }
 
-        out = pythonProcess.getOutputStream();
-        System.out.println("out " + out.toString());
+        System.out.println("pid " + pythonProcess.pid());
 
         BufferedReader br = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()));
         String line;
