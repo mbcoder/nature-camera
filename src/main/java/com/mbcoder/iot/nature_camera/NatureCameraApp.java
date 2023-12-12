@@ -89,6 +89,7 @@ public class NatureCameraApp extends Application {
    */
   @Override
   public void stop() throws IOException {
+    // stop the python pir camera detector
     Runtime.getRuntime().exec("kill " + pid);
   }
 }
