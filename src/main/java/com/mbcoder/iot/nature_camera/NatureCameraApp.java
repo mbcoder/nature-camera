@@ -27,7 +27,7 @@ import javafx.stage.Stage;
  */
 
 public class NatureCameraApp extends Application {
-  private OutputStream out;
+  private long pid;
 
 
   public static void main(String[] args) {
@@ -55,7 +55,8 @@ public class NatureCameraApp extends Application {
           throw new RuntimeException(e);
         }
 
-        System.out.println("pid " + pythonProcess.pid());
+        // capture the process id so we can stop it later
+        pid = pythonProcess.pid();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()));
         String line;
@@ -87,7 +88,7 @@ public class NatureCameraApp extends Application {
     Button btnStop = new Button("stop");
     btnStop.setOnAction(event -> {
       try {
-        out.close();
+        Runtime.getRuntime().exec("kill " + pid);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
