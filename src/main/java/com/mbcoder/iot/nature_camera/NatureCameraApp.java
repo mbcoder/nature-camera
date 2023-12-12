@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -68,14 +69,20 @@ public class NatureCameraApp extends Application {
     Thread pythonThread = new Thread(pythonRunnable);
     pythonThread.start();
 
-    pythonThread.run();
+
 
     // create a JavaFX scene with a stack pane as the root node and add it to the scene
     StackPane stackPane = new StackPane();
     Scene scene = new Scene(stackPane);
     stage.setScene(scene);
 
+    Button btnStop = new Button("stop");
+    btnStop.setOnAction(event -> {
 
+      //pythonThread.interrupt();
+      pythonThread.stop();
+    });
+    stackPane.getChildren().add(btnStop);
 
 
     /*
