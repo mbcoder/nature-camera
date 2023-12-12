@@ -1,14 +1,12 @@
 package com.mbcoder.iot.nature_camera;
 
-import com.pi4j.Pi4J;
-import com.pi4j.io.gpio.digital.DigitalInput;
-import com.pi4j.io.gpio.digital.DigitalInputProvider;
-import com.pi4j.io.gpio.digital.PullResistance;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import javafx.scene.control.Button;
 
 /**
  * Copyright 2019 Esri
@@ -35,7 +33,7 @@ public class NatureCameraApp extends Application {
   }
 
   @Override
-  public void start(Stage stage) {
+  public void start(Stage stage) throws IOException {
 
     // set the title and size of the stage and show it
     stage.setTitle("Nature camera app");
@@ -43,10 +41,41 @@ public class NatureCameraApp extends Application {
     stage.setHeight(700);
     stage.show();
 
+
+    Runnable pythonThread = new Runnable() {
+      @Override
+      public void run() {
+        Process p;
+        try {
+          p = Runtime.getRuntime().exec(new String[]{"python3","pircamera.py"});
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String line;
+        while (true) {
+          try {
+            if (!((line = br.readLine()) != null)) break;
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+          System.out.println(line);
+        }
+      }
+    };
+
+    pythonThread.run();
+
     // create a JavaFX scene with a stack pane as the root node and add it to the scene
     StackPane stackPane = new StackPane();
     Scene scene = new Scene(stackPane);
     stage.setScene(scene);
+
+
+
+
+    /*
 
     var pi4j = Pi4J.newAutoContext();
 
@@ -80,6 +109,8 @@ public class NatureCameraApp extends Application {
     System.out.println(input.state() + "]");
 
     stackPane.getChildren().add(btnState);
+
+     */
 
 
 
