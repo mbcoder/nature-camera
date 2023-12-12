@@ -58,6 +58,7 @@ public class NatureCameraApp extends Application {
         // capture the process id so we can stop it later
         pid = pythonProcess.pid();
 
+        /*
         BufferedReader br = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()));
         String line;
         while (true) {
@@ -69,71 +70,17 @@ public class NatureCameraApp extends Application {
           System.out.println(line);
         }
 
-
-
-
+         */
       }
     };
 
     Thread pythonThread = new Thread(pythonRunnable);
     pythonThread.start();
 
-
-
     // create a JavaFX scene with a stack pane as the root node and add it to the scene
     StackPane stackPane = new StackPane();
     Scene scene = new Scene(stackPane);
     stage.setScene(scene);
-
-    Button btnStop = new Button("stop");
-    btnStop.setOnAction(event -> {
-      try {
-        Runtime.getRuntime().exec("kill " + pid);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    });
-    stackPane.getChildren().add(btnStop);
-
-
-    /*
-
-    var pi4j = Pi4J.newAutoContext();
-
-    var config = DigitalInput.newConfigBuilder(pi4j)
-        .id("pir-sensor")
-        .address(17)
-        .pull(PullResistance.PULL_DOWN)
-        .build();
-
-    // get a Digital Input I/O provider from the Pi4J context
-    DigitalInputProvider digitalInputProvider = pi4j.provider("pigpio-digital-input");
-
-    var input = digitalInputProvider.create(config);
-
-    var state = input.state();
-
-
-    // setup a digital output listener to listen for any state changes on the digital input
-    input.addListener(event -> {
-      //Integer count = (Integer) event.source().metadata().get("count").value();
-      System.out.println(" --- button state = " + input.state());
-      //System.out.println(event + " === " + count);
-    });
-
-    Button btnState = new Button("state update");
-    btnState.setOnAction(event -> {
-      System.out.println("button state = " + input.state());
-    });
-
-    System.out.print("THE STARTING DIGITAL INPUT STATE IS [");
-    System.out.println(input.state() + "]");
-
-    stackPane.getChildren().add(btnState);
-
-     */
-
-
 
   }
 
@@ -141,8 +88,8 @@ public class NatureCameraApp extends Application {
    * Stops and releases all resources used in application.
    */
   @Override
-  public void stop() {
-
+  public void stop() throws IOException {
+    Runtime.getRuntime().exec("kill " + pid);
   }
 }
 
