@@ -42,7 +42,7 @@ public class NatureCameraApp extends Application {
     stage.show();
 
 
-    Runnable pythonThread = new Runnable() {
+    Runnable pythonRunnable = new Runnable() {
       @Override
       public void run() {
         Process p;
@@ -64,6 +64,9 @@ public class NatureCameraApp extends Application {
         }
       }
     };
+
+    Thread pythonThread = new Thread(pythonRunnable);
+    pythonThread.start();
 
     pythonThread.run();
 
