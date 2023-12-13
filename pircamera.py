@@ -8,6 +8,9 @@ import os
 if not os.path.exists("create"):
 	os.makedirs("create")
 
+if not os.path.exists("images"):
+	os.makedirs("images")
+
 #start up the camera
 picam2 = Picamera2()
 capture_config = picam2.create_still_configuration()
@@ -27,6 +30,6 @@ while True:
 	picam2.switch_mode_and_capture_file(capture_config, dt_create)
 
 	#copy complete file into processing directory.  Prevents accidental reading before it is complete
-	#shutil.move("path/to/current/file.foo", "path/to/new/destination/for/file.foo")
+	shutil.move(dt_create, dt_process)
 
 	pir.wait_for_no_motion()
