@@ -1,1 +1,0 @@
-directory for collecting nature camera images

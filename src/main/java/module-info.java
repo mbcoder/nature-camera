@@ -18,14 +18,15 @@ module com.mbcoder.iot.nature_camera {
   // modules required by the app
   requires com.esri.arcgisruntime;
   requires javafx.graphics;
-  requires org.slf4j.nop;
+  //requires org.slf4j.nop;
 
   // Pi4J MODULES
-  requires com.pi4j;
-  requires com.pi4j.plugin.pigpio;
+  //requires com.pi4j;
+  //requires com.pi4j.plugin.pigpio;
   requires javafx.controls;
+  requires org.apache.commons.io;
 
-  opens com.mbcoder.iot.nature_camera to com.pi4j;
+  //opens com.mbcoder.iot.nature_camera to com.pi4j;
 
   exports com.mbcoder.iot.nature_camera;
 }

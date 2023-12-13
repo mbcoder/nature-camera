@@ -1,18 +1,26 @@
 package com.mbcoder.iot.nature_camera;
 
+import com.esri.arcgisruntime.data.ArcGISFeature;
+import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Copyright 2019 Esri
@@ -33,7 +41,8 @@ import javafx.stage.Stage;
 public class NatureCameraApp extends Application {
   private long pid;
   private Timer fileCheckTimer;
-  private String cameraID = "";
+  //private String cameraID = "7563d7fe-29b7-4cb1-b6e9-e9f124530a71";
+  private final UUID cameraID = UUID.fromString("7563d7fe-29b7-4cb1-b6e9-e9f124530a71");
   private String serviceTableURL = "https://services1.arcgis.com/6677msI40mnLuuLr/ArcGIS/rest/services/NatureCamera/FeatureServer/1";
   private ServiceFeatureTable table;
 
@@ -125,8 +134,52 @@ public class NatureCameraApp extends Application {
 
     for (String file : contents) {
       System.out.println("file - " + file);
+
+      addRecordWithAttachment(file);
     }
 
+  }
+
+  /**
+   * method to add new record with an image file attachment
+   *
+   * @param attachmentFile
+   */
+  private void addRecordWithAttachment(String attachmentFile) {
+    // create attributes for the nature camera image
+    Map<String, Object> attributes = new HashMap<>();
+    attributes.put("NatureCameraID", cameraID);
+    attributes.put("ImageDate", Calendar.getInstance());
+
+    // create the feature
+    ArcGISFeature reportFeature = (ArcGISFeature) table.createFeature(attributes, null);
+
+    // get image attachment
+    try {
+      byte[] image = IOUtils.toByteArray(new FileInputStream("images/" + attachmentFile));
+
+      // add the feature to the table
+      var addFuture = table.addFeatureAsync(reportFeature);
+      //addFuture.addDoneListener(table::applyEditsAsync);
+      addFuture.addDoneListener(() -> {
+        System.out.println("added  feature");
+
+        reportFeature.addAttachmentAsync(image, "image/png", attachmentFile)
+            .toCompletableFuture()
+            .thenCompose(addedAttachment -> table.updateFeatureAsync(reportFeature).toCompletableFuture())
+            .thenRun(() -> table.applyEditsAsync())
+            .thenRun(() -> deleteFile(attachmentFile));
+      });
+
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
+  private void deleteFile (String file)  {
+    File fileToDelete = new File("images/" + file);
+    fileToDelete.delete();
   }
 
   /**
