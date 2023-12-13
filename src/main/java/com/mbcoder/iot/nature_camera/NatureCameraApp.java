@@ -163,7 +163,6 @@ public class NatureCameraApp extends Application {
 
       // add the feature to the table
       var addFuture = table.addFeatureAsync(reportFeature);
-      //addFuture.addDoneListener(table::applyEditsAsync);
       addFuture.addDoneListener(() -> {
         System.out.println("added feature");
 
@@ -171,11 +170,11 @@ public class NatureCameraApp extends Application {
         attachFuture.addDoneListener(()-> {
           System.out.println("attachment added");
 
-          var updateFuture = table.updateFeatureAsync(reportFeature);
-          updateFuture.addDoneListener(()-> {
+          //var updateFuture = table.updateFeatureAsync(reportFeature);
+          //updateFuture.addDoneListener(()-> {
             System.out.println("feature updated with attachment");
             deleteFile(attachmentFile);
-          });
+          //});
         });
         /*
         reportFeature.addAttachmentAsync(image, "image/png", attachmentFile)
