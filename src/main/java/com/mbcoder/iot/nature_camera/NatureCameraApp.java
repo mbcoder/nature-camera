@@ -161,6 +161,23 @@ public class NatureCameraApp extends Application {
     try {
       byte[] image = IOUtils.toByteArray(new FileInputStream("images/" + attachmentFile));
 
+      // add attachment to the feature
+      var attachFuture = reportFeature.addAttachmentAsync(image, "image/png", attachmentFile);
+      attachFuture.addDoneListener(()-> {
+        System.out.println("attachment added");
+
+        var addFuture = table.addFeatureAsync(reportFeature);
+        addFuture.addDoneListener(() -> {
+          System.out.println("feature added");
+          deleteFile(attachmentFile);
+
+        });
+
+      });
+
+
+      /*
+
       // add the feature to the table
       var addFuture = table.addFeatureAsync(reportFeature);
       addFuture.addDoneListener(() -> {
@@ -172,7 +189,7 @@ public class NatureCameraApp extends Application {
 
           //var updateFuture = table.updateFeatureAsync(reportFeature);
           //updateFuture.addDoneListener(()-> {
-            System.out.println("feature updated with attachment");
+            //System.out.println("feature updated with attachment");
             deleteFile(attachmentFile);
           //});
         });
@@ -184,7 +201,9 @@ public class NatureCameraApp extends Application {
             .thenRun(() -> deleteFile(attachmentFile));
 
          */
-      });
+      //});
+
+
 
     } catch (IOException e) {
       throw new RuntimeException(e);
