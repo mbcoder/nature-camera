@@ -5,7 +5,7 @@ import shutil
 import os
 
 #set if directories if they don't exist
-if not os.path.exists("create")
+if not os.path.exists("create"):
 	os.makedirs("create")
 
 #start up the camera
