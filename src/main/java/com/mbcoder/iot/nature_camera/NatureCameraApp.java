@@ -134,9 +134,10 @@ public class NatureCameraApp extends Application {
 
     for (String file : contents) {
       System.out.println("file - " + file);
-
       addRecordWithAttachment(file);
     }
+
+    table.applyEditsAsync();
 
   }
 
@@ -154,6 +155,8 @@ public class NatureCameraApp extends Application {
     // create the feature
     ArcGISFeature reportFeature = (ArcGISFeature) table.createFeature(attributes, null);
 
+
+
     // get image attachment
     try {
       byte[] image = IOUtils.toByteArray(new FileInputStream("images/" + attachmentFile));
@@ -162,13 +165,26 @@ public class NatureCameraApp extends Application {
       var addFuture = table.addFeatureAsync(reportFeature);
       //addFuture.addDoneListener(table::applyEditsAsync);
       addFuture.addDoneListener(() -> {
-        System.out.println("added  feature");
+        System.out.println("added feature");
 
+        var attachFuture = reportFeature.addAttachmentAsync(image, "image/png", attachmentFile);
+        attachFuture.addDoneListener(()-> {
+          System.out.println("attachment added");
+
+          var updateFuture = table.updateFeatureAsync(reportFeature);
+          updateFuture.addDoneListener(()-> {
+            System.out.println("feature updated with attachment");
+            deleteFile(attachmentFile);
+          });
+        });
+        /*
         reportFeature.addAttachmentAsync(image, "image/png", attachmentFile)
             .toCompletableFuture()
             .thenCompose(addedAttachment -> table.updateFeatureAsync(reportFeature).toCompletableFuture())
             .thenRun(() -> table.applyEditsAsync())
             .thenRun(() -> deleteFile(attachmentFile));
+
+         */
       });
 
     } catch (IOException e) {
