@@ -32,9 +32,10 @@ ext {
 
 repositories {
     mavenCentral()
-    maven {
-        url 'https://esri.jfrog.io/artifactory/arcgis'
-    }
+    mavenLocal()
+    //maven {
+    //    url 'https://esri.jfrog.io/artifactory/arcgis'
+    //}
 }
 
 configurations {

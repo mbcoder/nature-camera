@@ -1,9 +1,13 @@
 package com.mbcoder.iot.nature_camera;
 
+import com.esri.arcgisruntime.data.ServiceFeatureTable;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Timer;
+import java.util.TimerTask;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -28,6 +32,10 @@ import javafx.stage.Stage;
 
 public class NatureCameraApp extends Application {
   private long pid;
+  private Timer fileCheckTimer;
+  private String cameraID = "";
+  private String serviceTableURL = "https://services1.arcgis.com/6677msI40mnLuuLr/ArcGIS/rest/services/NatureCamera/FeatureServer/1";
+  private ServiceFeatureTable table;
 
 
   public static void main(String[] args) {
@@ -58,22 +66,10 @@ public class NatureCameraApp extends Application {
         // capture the process id so we can stop it later
         pid = pythonProcess.pid();
 
-        /*
-        BufferedReader br = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()));
-        String line;
-        while (true) {
-          try {
-            if (!((line = br.readLine()) != null)) break;
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
-          System.out.println(line);
-        }
-
-         */
       }
     };
 
+    // start the python process on a new thread
     Thread pythonThread = new Thread(pythonRunnable);
     pythonThread.start();
 
@@ -81,6 +77,55 @@ public class NatureCameraApp extends Application {
     StackPane stackPane = new StackPane();
     Scene scene = new Scene(stackPane);
     stage.setScene(scene);
+
+    // connect to table we will be recording images into
+    table = new ServiceFeatureTable(serviceTableURL);
+    table.loadAsync();
+    table.addDoneLoadingListener(()-> {
+      System.out.println("table loaded");
+      // timer for reading sensor and logging results
+      fileCheckTimer = new Timer();
+      fileCheckTimer.schedule(new TimerTask() {
+        public void run() {
+          // check for files
+          System.out.println("checking for new files");
+          checkImageFiles();
+
+        }
+      }, 1000, 5000); // check for new files every 5 seconds
+    });
+
+
+
+
+
+    Button btnListFiles = new Button("list files");
+    btnListFiles.setOnAction(event -> {
+      //Creating a File object for directory
+      File directoryPath = new File("images");
+      //List of all files and directories
+      String contents[] = directoryPath.list();
+
+      for (String file : contents) {
+        System.out.println("file - " + file);
+      }
+    });
+    stackPane.getChildren().add(btnListFiles);
+
+  }
+
+  /**
+   * Checks for new image files created by the python pir camera script
+   */
+  private void checkImageFiles() {
+    //Creating a File object for directory
+    File directoryPath = new File("images");
+    //List of all files and directories
+    String contents[] = directoryPath.list();
+
+    for (String file : contents) {
+      System.out.println("file - " + file);
+    }
 
   }
 
@@ -91,6 +136,9 @@ public class NatureCameraApp extends Application {
   public void stop() throws IOException {
     // stop the python pir camera detector
     Runtime.getRuntime().exec("kill " + pid);
+
+    // stop timer which looks for new files
+    if (fileCheckTimer != null) fileCheckTimer.cancel();
   }
 }
 

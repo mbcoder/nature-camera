@@ -16,7 +16,7 @@
 
 module com.mbcoder.iot.nature_camera {
   // modules required by the app
-  //requires com.esri.arcgisruntime;
+  requires com.esri.arcgisruntime;
   requires javafx.graphics;
   requires org.slf4j.nop;
 
