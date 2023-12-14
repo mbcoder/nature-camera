@@ -160,6 +160,7 @@ public class NatureCameraApp extends Application {
     // get image attachment
     try {
       byte[] image = IOUtils.toByteArray(new FileInputStream("images/" + attachmentFile));
+      System.out.println("image size : " + image.length);
 
       // add attachment to the feature
       var attachFuture = reportFeature.addAttachmentAsync(image, "image/png", attachmentFile);
