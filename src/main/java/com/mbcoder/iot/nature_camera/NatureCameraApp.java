@@ -6,6 +6,7 @@ import com.esri.arcgisruntime.data.ServiceFeatureTable;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -134,7 +136,15 @@ public class NatureCameraApp extends Application {
 
     for (String file : contents) {
       System.out.println("file - " + file);
-      addRecordWithAttachment(file);
+      try {
+        addRecordWithAttachment(file);
+      } catch (ExecutionException e) {
+        throw new RuntimeException(e);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
 
     table.applyEditsAsync();
@@ -146,7 +156,7 @@ public class NatureCameraApp extends Application {
    *
    * @param attachmentFile
    */
-  private void addRecordWithAttachment(String attachmentFile) {
+  private void addRecordWithAttachment(String attachmentFile) throws ExecutionException, InterruptedException, IOException {
     // create attributes for the nature camera image
     Map<String, Object> attributes = new HashMap<>();
     attributes.put("NatureCameraID", cameraID);
@@ -155,14 +165,18 @@ public class NatureCameraApp extends Application {
     // create the feature
     ArcGISFeature reportFeature = (ArcGISFeature) table.createFeature(attributes, null);
 
-
-
     // get image attachment
-    try {
       byte[] image = IOUtils.toByteArray(new FileInputStream("images/" + attachmentFile));
       System.out.println("image size : " + image.length);
 
       // add attachment to the feature
+      reportFeature.addAttachmentAsync(image, "image/png", attachmentFile).get();
+      System.out.println("attachment added");
+      table.addFeatureAsync(reportFeature).get();
+      System.out.println("feature added");
+      deleteFile(attachmentFile);
+
+      /*
       var attachFuture = reportFeature.addAttachmentAsync(image, "image/png", attachmentFile);
       attachFuture.addDoneListener(()-> {
         System.out.println("attachment added");
@@ -175,6 +189,8 @@ public class NatureCameraApp extends Application {
         });
 
       });
+
+       */
 
 
       /*
@@ -204,11 +220,6 @@ public class NatureCameraApp extends Application {
          */
       //});
 
-
-
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
 
   }
 
