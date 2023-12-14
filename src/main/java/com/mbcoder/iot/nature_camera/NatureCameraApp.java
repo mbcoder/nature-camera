@@ -1,31 +1,5 @@
-package com.mbcoder.iot.nature_camera;
-
-import com.esri.arcgisruntime.data.ArcGISFeature;
-import com.esri.arcgisruntime.data.Feature;
-import com.esri.arcgisruntime.data.ServiceFeatureTable;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
-import org.apache.commons.io.IOUtils;
-
 /**
- * Copyright 2019 Esri
+ * Copyright 2024 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy
@@ -40,30 +14,62 @@ import org.apache.commons.io.IOUtils;
  * under the License.
  */
 
+package com.mbcoder.iot.nature_camera;
+
+import com.esri.arcgisruntime.data.ArcGISFeature;
+import com.esri.arcgisruntime.data.ServiceFeatureTable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+import org.apache.commons.io.IOUtils;
+
 public class NatureCameraApp extends Application {
   private long pid;
   private Timer fileCheckTimer;
-  //private String cameraID = "7563d7fe-29b7-4cb1-b6e9-e9f124530a71";
   private final UUID cameraID = UUID.fromString("7563d7fe-29b7-4cb1-b6e9-e9f124530a71");
   private String serviceTableURL = "https://services1.arcgis.com/6677msI40mnLuuLr/ArcGIS/rest/services/NatureCamera/FeatureServer/1";
   private ServiceFeatureTable table;
 
-
+  /**
+   * Entry point for app which launches a JavaFX app instance.
+   * @param args
+   */
   public static void main(String[] args) {
 
     Application.launch(args);
   }
 
+  /**
+   * Method which contains logic for starting the Java FX application
+   *
+   * @param stage the primary stage for this application, onto which
+   * the application scene can be set.
+   * Applications may create other stages, if needed, but they will not be
+   * primary stages.
+   * @throws IOException
+   */
   @Override
   public void start(Stage stage) throws IOException {
 
     // set the title and size of the stage and show it
     stage.setTitle("Nature camera app");
     stage.setWidth(800);
-    stage.setHeight(700);
+    stage.setHeight(100);
     stage.show();
 
-
+    // create a runnable to run a python script which senses movement from a PIR sensor, captures images from a camera
+    // and writes the files to a directory for processing by this app.
     Runnable pythonRunnable = new Runnable() {
       @Override
       public void run() {
@@ -76,7 +82,6 @@ public class NatureCameraApp extends Application {
 
         // capture the process id so we can stop it later
         pid = pythonProcess.pid();
-
       }
     };
 
@@ -93,7 +98,6 @@ public class NatureCameraApp extends Application {
     table = new ServiceFeatureTable(serviceTableURL);
     table.loadAsync();
     table.addDoneLoadingListener(()-> {
-      System.out.println("table loaded");
       // timer for reading sensor and logging results
       fileCheckTimer = new Timer();
       fileCheckTimer.schedule(new TimerTask() {
@@ -101,32 +105,14 @@ public class NatureCameraApp extends Application {
           // check for files
           System.out.println("checking for new files");
           checkImageFiles();
-
         }
       }, 1000, 5000); // check for new files every 5 seconds
     });
-
-
-
-
-
-    Button btnListFiles = new Button("list files");
-    btnListFiles.setOnAction(event -> {
-      //Creating a File object for directory
-      File directoryPath = new File("images");
-      //List of all files and directories
-      String contents[] = directoryPath.list();
-
-      for (String file : contents) {
-        System.out.println("file - " + file);
-      }
-    });
-    stackPane.getChildren().add(btnListFiles);
-
   }
 
   /**
-   * Checks for new image files created by the python pir camera script
+   * Checks for new image files created by the python pir camera script.  If there are
+   * images in the directory they will be added to a table as attachments
    */
   private void checkImageFiles() {
     //Creating a File object for directory
@@ -138,17 +124,12 @@ public class NatureCameraApp extends Application {
       System.out.println("file - " + file);
       try {
         addRecordWithAttachment(file);
-      } catch (ExecutionException e) {
-        throw new RuntimeException(e);
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      } catch (IOException e) {
+      } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
-
+    // apply edits to feature service
     table.applyEditsAsync();
-
   }
 
   /**
@@ -165,64 +146,23 @@ public class NatureCameraApp extends Application {
     // create the feature
     ArcGISFeature reportFeature = (ArcGISFeature) table.createFeature(attributes, null);
 
-    // get image attachment
-      byte[] image = IOUtils.toByteArray(new FileInputStream("images/" + attachmentFile));
-      System.out.println("image size : " + image.length);
+    // get image data
+    byte[] image = IOUtils.toByteArray(new FileInputStream("images/" + attachmentFile));
 
-      // add attachment to the feature
-      reportFeature.addAttachmentAsync(image, "image/png", attachmentFile).get();
-      System.out.println("attachment added");
-      table.addFeatureAsync(reportFeature).get();
-      System.out.println("feature added");
-      deleteFile(attachmentFile);
+    // add the image as an attachment to the feature
+    reportFeature.addAttachmentAsync(image, "image/png", attachmentFile).get();
 
-      /*
-      var attachFuture = reportFeature.addAttachmentAsync(image, "image/png", attachmentFile);
-      attachFuture.addDoneListener(()-> {
-        System.out.println("attachment added");
+    // add the feature to the feature table
+    table.addFeatureAsync(reportFeature).get();
 
-        var addFuture = table.addFeatureAsync(reportFeature);
-        addFuture.addDoneListener(() -> {
-          System.out.println("feature added");
-          deleteFile(attachmentFile);
-
-        });
-
-      });
-
-       */
-
-
-      /*
-
-      // add the feature to the table
-      var addFuture = table.addFeatureAsync(reportFeature);
-      addFuture.addDoneListener(() -> {
-        System.out.println("added feature");
-
-        var attachFuture = reportFeature.addAttachmentAsync(image, "image/png", attachmentFile);
-        attachFuture.addDoneListener(()-> {
-          System.out.println("attachment added");
-
-          //var updateFuture = table.updateFeatureAsync(reportFeature);
-          //updateFuture.addDoneListener(()-> {
-            //System.out.println("feature updated with attachment");
-            deleteFile(attachmentFile);
-          //});
-        });
-        /*
-        reportFeature.addAttachmentAsync(image, "image/png", attachmentFile)
-            .toCompletableFuture()
-            .thenCompose(addedAttachment -> table.updateFeatureAsync(reportFeature).toCompletableFuture())
-            .thenRun(() -> table.applyEditsAsync())
-            .thenRun(() -> deleteFile(attachmentFile));
-
-         */
-      //});
-
-
+    // remove the file now it's added to the feature
+    deleteFile(attachmentFile);
   }
 
+  /**
+   * Method to delete file after it has been added to a feature
+   * @param file
+   */
   private void deleteFile (String file)  {
     File fileToDelete = new File("images/" + file);
     fileToDelete.delete();

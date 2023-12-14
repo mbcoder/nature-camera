@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Esri
+ * Copyright 2024 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
  * use this file except in compliance with the License. You may obtain a copy 
@@ -33,9 +33,6 @@ ext {
 repositories {
     mavenCentral()
     mavenLocal()
-    //maven {
-    //    url 'https://esri.jfrog.io/artifactory/arcgis'
-    //}
 }
 
 configurations {
@@ -47,11 +44,6 @@ dependencies {
     natives "com.esri.arcgisruntime:arcgis-java-jnilibs:$arcgisVersion"
     natives "com.esri.arcgisruntime:arcgis-java-resources:$arcgisVersion"
     implementation 'commons-io:commons-io:2.15.0'
-    // handle SLF4J http://www.slf4j.org/codes.html#StaticLoggerBinder using a no-operation logger
-    //implementation "org.slf4j:slf4j-nop:2.0.9"
-    //implementation 'com.pi4j:pi4j-core:2.3.0'
-    //implementation 'com.pi4j:pi4j-plugin-raspberrypi:2.3.0'
-    //implementation 'com.pi4j:pi4j-plugin-pigpio:2.3.0'
 }
 
 javafx {
