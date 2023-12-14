@@ -38,12 +38,11 @@ public class NatureCameraApp extends Application {
   private long pid;
   private Timer fileCheckTimer;
   private final UUID cameraID = UUID.fromString("7563d7fe-29b7-4cb1-b6e9-e9f124530a71");
-  private String serviceTableURL = "https://services1.arcgis.com/6677msI40mnLuuLr/ArcGIS/rest/services/NatureCamera/FeatureServer/1";
+  private final String serviceTableURL = "https://services1.arcgis.com/6677msI40mnLuuLr/ArcGIS/rest/services/NatureCamera/FeatureServer/1";
   private ServiceFeatureTable table;
 
   /**
    * Entry point for app which launches a JavaFX app instance.
-   * @param args
    */
   public static void main(String[] args) {
 
@@ -118,7 +117,7 @@ public class NatureCameraApp extends Application {
     //Creating a File object for directory
     File directoryPath = new File("images");
     //List of all files and directories
-    String contents[] = directoryPath.list();
+    String[] contents = directoryPath.list();
 
     for (String file : contents) {
       System.out.println("file - " + file);
@@ -135,7 +134,7 @@ public class NatureCameraApp extends Application {
   /**
    * method to add new record with an image file attachment
    *
-   * @param attachmentFile
+   * @param attachmentFile file to be attached to feature
    */
   private void addRecordWithAttachment(String attachmentFile) throws ExecutionException, InterruptedException, IOException {
     // create attributes for the nature camera image
@@ -160,8 +159,8 @@ public class NatureCameraApp extends Application {
   }
 
   /**
-   * Method to delete file after it has been added to a feature
-   * @param file
+   * Method to delete file from the image directory
+   * @param file name of file to be deleted
    */
   private void deleteFile (String file)  {
     File fileToDelete = new File("images/" + file);
